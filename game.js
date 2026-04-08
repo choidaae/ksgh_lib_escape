@@ -118,7 +118,21 @@ const PopupModal = ({ title, content, onClose, showItemGet }) => {
   );
 };
 
-const ChoiceButton = ({ children, onClick, disabled = false }) => React.createElement('button', { className: `choice-btn ${disabled ? 'disabled' : ''}`, onClick, disabled }, children);
+const ChoiceButton = ({ children, onClick, disabled = false }) => {
+  const handleTouch = (e) => {
+    if (disabled) return;
+    e.preventDefault();
+    const btn = e.currentTarget;
+    btn.classList.add('touch-active');
+    setTimeout(() => { btn.classList.remove('touch-active'); onClick && onClick(); }, 80);
+  };
+  return React.createElement('button', {
+    className: `choice-btn ${disabled ? 'disabled' : ''}`,
+    onTouchEnd: handleTouch,
+    onClick: (e) => { if (e.isTrusted && 'ontouchstart' in window) return; onClick && onClick(); },
+    disabled
+  }, children);
+};
 
 function BloomTheStory() {
   const [scene, setScene] = useState(SCENES.INTRO);

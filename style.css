@@ -73,7 +73,7 @@
     .choice-btn:hover:not(:disabled) { background: rgba(246, 173, 85, 0.15); border-color: #f6ad55; transform: translateX(5px); }
     }
     /* 모바일 화면을 터치하는 순간(누르고 있을 때) 효과 적용 */
-    .choice-btn:active:not(:disabled) { background: rgba(246, 173, 85, 0.15); border-color: #f6ad55; transform: translateX(5px); }
+    .choice-btn:active:not(:disabled), .choice-btn.touch-active { background: rgba(246, 173, 85, 0.15); border-color: #f6ad55; transform: translateX(5px); }
     .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .book-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; max-width: 350px; }
     .book-choices .choice-btn { text-align: center; padding: 0.8rem; font-size: 0.85rem; }
