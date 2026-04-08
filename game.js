@@ -196,7 +196,7 @@ function BloomTheStory() {
   useEffect(() => { if (scene === SCENES.BOOKSHELF_PUZZLE && !anagramInitialized) { setAnagramLetters(['C','E','R','V','A','N','T','E','S'].sort(() => Math.random() - 0.5)); setAnagramSlots(['','','','','','','','','']); setAnagramInitialized(true); } }, [scene, anagramInitialized]);
   useEffect(() => { if (scene === SCENES.THEATER_PUZZLE && cards.length === 0) { const allCards = QUOTE_PAIRS.flatMap(pair => [{ id: `work-${pair.id}`, pairId: pair.id, type: 'work', content: pair.work }, { id: `quote-${pair.id}`, pairId: pair.id, type: 'quote', content: pair.quote }]); setCards(allCards.sort(() => Math.random() - 0.5)); } }, [scene, cards.length]);
 
-  const goToScene = (newScene, skipAnimation = false) => { if (skipAnimation || visitedScenes[newScene]) setTextComplete(true); else setTextComplete(false); setScene(newScene); markVisited(newScene); };
+  const goToScene = (newScene, skipAnimation = false) => { markVisited(scene); if (skipAnimation || visitedScenes[newScene]) setTextComplete(true); else setTextComplete(false); setScene(newScene); };
 
   const handleLockerInput = (index, value) => { if (!/^\d*$/.test(value)) return; const newCode = [...lockerCode]; newCode[index] = value.slice(-1); setLockerCode(newCode); setLockerError(false); if (value && index < 3) document.getElementById(`locker-${index + 1}`)?.focus(); };
   const handleLockerSubmit = () => { if (lockerCode.join('') === '0423') goToScene(SCENES.LOCKER_OPEN); else { setLockerError(true); setLockerCode(['','','','']); document.getElementById('locker-0')?.focus(); } };
