@@ -288,8 +288,8 @@ function BloomTheStory() {
               : React.createElement(TypeWriter, { text: '핸드폰을 꺼내려 주머니에 손을 넣으니\n[highlight]구겨진 편지[/highlight]가 손에 잡힌다.\n\n핸드폰 배터리는 10%밖에 남지 않아\n금방이라도 꺼질 것 같다.\n\n불빛을 비추니 눈앞에\n[skyblue]포스터[/skyblue]와 [skyblue]사물함[/skyblue]이 보인다.', speed: 35, onComplete: () => setTextComplete(true) })
           ),
           (textComplete || visitedScenes[SCENES.PHONE_ON]) && React.createElement('div', { className: 'choices' },
-            React.createElement(ChoiceButton, { onClick: () => { addItem('poster'); goToScene(SCENES.POSTER_VIEW, true); } }, '📋 포스터를 살펴본다'),
-            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.LOCKER_PUZZLE, true) }, '🔒 사물함을 살펴본다')
+            React.createElement(ChoiceButton, { onClick: () => { addItem('poster'); goToScene(SCENES.POSTER_VIEW); } }, '📋 포스터를 살펴본다'),
+            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.LOCKER_PUZZLE) }, '🔒 사물함을 살펴본다')
           )
         );
 
@@ -356,15 +356,7 @@ function BloomTheStory() {
       case SCENES.LOCKER_OPEN:
         return React.createElement('div', { className: 'scene' },
           React.createElement('div', { className: 'scene-text' },
-            visitedScenes[SCENES.LOCKER_OPEN]
-              ? React.createElement('p', null, 
-                  '찰칵!', React.createElement('br'), React.createElement('br'), 
-                  '자물쇠가 열렸다.', React.createElement('br'), 
-                  '안에는 ', React.createElement('span', { className: 'highlight' }, '손전등'), '과 ', React.createElement('span', { className: 'highlight' }, '양초와 성냥'), '이 들어있다.', React.createElement('br'), React.createElement('br'), 
-                  '...그리고 그 순간, 핸드폰의 배터리가 모두 닳아 꺼져버렸다.', React.createElement('br'), React.createElement('br'), 
-                  '주변을 다시 밝힐 것이 필요하다.'
-                )
-              : React.createElement(TypeWriter, { text: '찰칵!\n\n자물쇠가 열렸다.\n안에는 [highlight]손전등[/highlight]과 [highlight]양초와 성냥[/highlight]이 들어있다.\n\n...그리고 그 순간, 핸드폰이 꺼져버렸다.\n\n주변을 밝혀야 할 것 같다.', speed: 35, onComplete: () => setTextComplete(true) })
+            React.createElement(TypeWriter, { text: '찰칵!\n\n자물쇠가 열렸다.\n안에는 [highlight]손전등[/highlight]과 [highlight]양초와 성냥[/highlight]이 들어있다.\n\n...그리고 그 순간,\n핸드폰의 배터리가 모두 닳아 꺼져버렸다.\n\n주변을 다시 밝힐 것이 필요하다.', speed: 35, onComplete: () => setTextComplete(true) })
           ),
           (textComplete || visitedScenes[SCENES.LOCKER_OPEN]) && React.createElement(React.Fragment, null,
             React.createElement('p', { className: 'hint-text', style: { marginBottom: '1rem' } }, '💡 소지품에서 아이템을 선택하여 사용하세요.'),
@@ -391,9 +383,9 @@ function BloomTheStory() {
               : React.createElement(TypeWriter, { text: '손전등을 켜자 강렬한 빛이 쏟아진다.\n\n세상에. 도서관 책장에 책 제목들이\n점점 희미해져가고 있잖아!\n\n이대로 가다간 모든 이야기가 사라져버릴 것 같다.\n뭔가 방법을 찾아야 해.\n\n눈앞에는 [skyblue]정기간행물 코너[/skyblue],\n[skyblue]북 큐레이션 코너[/skyblue],\n그리고 [skyblue]봉인된 책장[/skyblue]이 보인다.', speed: 35, onComplete: () => setTextComplete(true) })
           ),
           (textComplete || visitedScenes[SCENES.LIBRARY_MAIN]) && React.createElement('div', { className: 'choices' },
-            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.PERIODICALS, true) }, '📰 정기간행물 코너를 둘러본다'),
-            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.CURATION, true) }, '📚 북 큐레이션 코너를 둘러본다'),
-            React.createElement(ChoiceButton, { onClick: () => { if (hasAllBooks()) goToScene(SCENES.BOOKSHELF_SELECT, true); else setPopup({ title: '🔮 봉인된 책장을 둘러본다', content: '책장 앞에 빈 책꽂이 두 칸이 보인다.\n\n뭔가 책을 꽂아야 할 것 같은데...\n일단 주변을 더 둘러보자.' }); } }, '🔮 봉인된 책장')
+            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.PERIODICALS) }, '📰 정기간행물 코너를 둘러본다'),
+            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.CURATION) }, '📚 북 큐레이션 코너를 둘러본다'),
+            React.createElement(ChoiceButton, { onClick: () => { if (hasAllBooks()) goToScene(SCENES.BOOKSHELF_SELECT); else setPopup({ title: '🔮 봉인된 책장을 둘러본다', content: '책장 앞에 빈 책꽂이 두 칸이 보인다.\n\n뭔가 책을 꽂아야 할 것 같은데...\n일단 주변을 더 둘러보자.' }); } }, '🔮 봉인된 책장')
           )
         );
 
@@ -509,7 +501,7 @@ function BloomTheStory() {
               React.createElement('p', null, '그의 작품과 명대사를 연결하라."')
             ),
             React.createElement('div', { className: 'choices' },
-              React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.THEATER_PUZZLE, true) }, '카드를 살펴본다')
+              React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.THEATER_PUZZLE) }, '카드를 살펴본다')
             )
           )
         );
@@ -547,7 +539,7 @@ function BloomTheStory() {
               : React.createElement(TypeWriter, { text: '모든 카드가 제자리를 찾자\n무대 뒤편의 문이 열린다.\n\n도서관 가장 깊은 곳.\n비밀의 서고.\n\n오래된 책들 사이로\n유리관 하나가 빛나고 있다.\n\n그 안에는... 말라버린 꽃 한 송이.', speed: 35, onComplete: () => setTextComplete(true) })
           ),
           (textComplete || visitedScenes[SCENES.SECRET_ROOM]) && React.createElement('div', { className: 'choices' },
-            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.CANDLE_SELECT, true) }, '시든 꽃에게 다가간다')
+            React.createElement(ChoiceButton, { onClick: () => goToScene(SCENES.CANDLE_SELECT) }, '시든 꽃에게 다가간다')
           )
         );
 
