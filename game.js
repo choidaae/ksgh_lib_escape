@@ -31,29 +31,53 @@ const QUOTE_PAIRS = [
   { id: 4, work: '한여름 밤의 꿈', quote: '사랑은 눈이 아니라 마음으로 보는 것' }
 ];
 
+const parseSegments = (text) => {
+  const parts = text.split(/(\[highlight\].*?\[\/highlight\]|\[skyblue\].*?\[\/skyblue\])/g);
+  const segments = [];
+  parts.forEach(part => {
+    if (part.startsWith('[highlight]')) {
+      segments.push({ text: part.replace(/\[\/?highlight\]/g, ''), className: 'highlight' });
+    } else if (part.startsWith('[skyblue]')) {
+      segments.push({ text: part.replace(/\[\/?skyblue\]/g, ''), className: 'skyblue-text' });
+    } else {
+      segments.push({ text: part, className: null });
+    }
+  });
+  return segments;
+};
+
+const renderSegments = (segments, charCount) => {
+  let remaining = charCount;
+  const result = [];
+  segments.forEach((seg, si) => {
+    if (remaining <= 0) return;
+    const visible = seg.text.slice(0, remaining);
+    remaining -= seg.text.length;
+    const lines = visible.split('\n');
+    const content = lines.map((line, j) => React.createElement(React.Fragment, { key: j }, line, j < lines.length - 1 && React.createElement('br')));
+    if (seg.className) {
+      result.push(React.createElement('span', { key: si, className: seg.className }, content));
+    } else {
+      result.push(React.createElement(React.Fragment, { key: si }, content));
+    }
+  });
+  return result;
+};
+
 const TypeWriter = ({ text, speed = 30, onComplete, className = '' }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const segments = parseSegments(text);
+  const totalChars = segments.reduce((sum, s) => sum + s.text.length, 0);
+  const [charCount, setCharCount] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  useEffect(() => { setDisplayedText(''); setCurrentIndex(0); setIsComplete(false); }, [text]);
+  useEffect(() => { setCharCount(0); setIsComplete(false); }, [text]);
   useEffect(() => {
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => { setDisplayedText(prev => prev + text[currentIndex]); setCurrentIndex(prev => prev + 1); }, speed);
+    if (charCount < totalChars) {
+      const timer = setTimeout(() => setCharCount(prev => prev + 1), speed);
       return () => clearTimeout(timer);
-    } else if (!isComplete && text.length > 0) { setIsComplete(true); onComplete?.(); }
-  }, [currentIndex, text, speed, onComplete, isComplete]);
-  
-  const handleSkip = () => { setDisplayedText(text); setCurrentIndex(text.length); };
-  
-  const renderText = (txt) => {
-    const parts = txt.split(/(\[highlight\].*?\[\/highlight\]|\[skyblue\].*?\[\/skyblue\])/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('[highlight]')) return React.createElement('span', { key: i, className: 'highlight' }, part.replace(/\[\/?highlight\]/g, ''));
-      if (part.startsWith('[skyblue]')) return React.createElement('span', { key: i, className: 'skyblue-text' }, part.replace(/\[\/?skyblue\]/g, ''));
-      return React.createElement(React.Fragment, { key: i }, part.split('\n').map((line, j) => React.createElement(React.Fragment, { key: j }, line, j < part.split('\n').length - 1 && React.createElement('br'))));
-    });
-  };
-  return React.createElement('div', { className, onClick: handleSkip }, renderText(displayedText), currentIndex < text.length && React.createElement('span', { className: 'cursor' }, '▌'));
+    } else if (!isComplete && totalChars > 0) { setIsComplete(true); onComplete?.(); }
+  }, [charCount, totalChars, speed, onComplete, isComplete]);
+  const handleSkip = () => { setCharCount(totalChars); };
+  return React.createElement('div', { className, onClick: handleSkip }, renderSegments(segments, charCount), charCount < totalChars && React.createElement('span', { className: 'cursor' }, '▌'));
 };
 
 const EffectOverlay = ({ type, onComplete }) => {
@@ -167,6 +191,7 @@ function BloomTheStory() {
   const [secretRoomItemGiven, setSecretRoomItemGiven] = useState(false);
   const [foundSecret, setFoundSecret] = useState(false);
   const [foundLibrarianLetter, setFoundLibrarianLetter] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => { if (notificationQueue.length > 0 && !notification) { setNotification(notificationQueue[0]); setNotificationQueue(prev => prev.slice(1)); setTimeout(() => setNotification(null), 2000); } }, [notificationQueue, notification]);
 
@@ -190,7 +215,7 @@ function BloomTheStory() {
     }
   };
 
-  useEffect(() => { if (scene === SCENES.PHONE_ON && !phoneOnItemGiven) { const t = setTimeout(() => { addItem('letter'); setPhoneOnItemGiven(true); }, 100); return () => clearTimeout(t); } }, [scene, phoneOnItemGiven, addItem]);
+  useEffect(() => { if (scene === SCENES.PHONE_ON && !phoneOnItemGiven) { const t = setTimeout(() => { addItem('letter'); setPhoneOnItemGiven(true); setShowTutorial(true); }, 100); return () => clearTimeout(t); } }, [scene, phoneOnItemGiven, addItem]);
   useEffect(() => { if (scene === SCENES.LOCKER_OPEN && !lockerOpenItemsGiven) { showEffect('unlock'); addItem('flashlight'); addItem('candle'); setLockerOpenItemsGiven(true); } }, [scene, lockerOpenItemsGiven, addItem]);
   useEffect(() => { if (scene === SCENES.SECRET_ROOM && !secretRoomItemGiven) { const t = setTimeout(() => { addItem('wiltedFlower'); setSecretRoomItemGiven(true); }, 500); return () => clearTimeout(t); } }, [scene, secretRoomItemGiven, addItem]);
   useEffect(() => { if (scene === SCENES.BOOKSHELF_PUZZLE && !anagramInitialized) { setAnagramLetters(['C','E','R','V','A','N','T','E','S'].sort(() => Math.random() - 0.5)); setAnagramSlots(['','','','','','','','','']); setAnagramInitialized(true); } }, [scene, anagramInitialized]);
@@ -616,6 +641,14 @@ function BloomTheStory() {
 
   return React.createElement('div', { className: 'game-container' },
     activeEffect && React.createElement(EffectOverlay, { type: activeEffect, onComplete: () => setActiveEffect(null) }),
+    showTutorial && React.createElement('div', { className: 'tutorial-overlay', onClick: () => setShowTutorial(false) },
+      React.createElement('div', { className: 'tutorial-arrow' }),
+      React.createElement('div', { className: 'tutorial-box' },
+        React.createElement('p', null, '게임에서 얻은 아이템은 소지품에서 확인할 수 있습니다.'),
+        React.createElement('p', null, '아이템에서 단서를 찾아 도서관을 탈출해보세요!'),
+        React.createElement('span', { className: 'tutorial-dismiss' }, '탭하여 닫기')
+      )
+    ),
     React.createElement(GameInventory, { items, isOpen: inventoryOpen, onClose: handleInventoryClose, notification, useMode: inventoryUseMode, onUseItem: handleUseItem, usePrompt: inventoryPrompt }),
     renderScene(),
     React.createElement(PopupModal, { title: popup?.title, content: popup?.content, showItemGet: popup?.showItemGet, onClose: () => setPopup(null) })
